@@ -1,0 +1,9 @@
+{
+  "name": "ロト7予想",
+  "short_name": "ロト7予想",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#c0392b",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
