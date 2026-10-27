@@ -116,9 +116,10 @@
     btn.disabled = true;
     $('status').textContent = '取り込み中…';
     try {
-      const res = await fetch('api/draws?count=30', { cache: 'no-store' });
+      let res = await fetch('data/draws.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) res = await fetch('api/draws?count=30', { cache: 'no-store' });
       const data = await res.json();
-      if (!res.ok || !data.draws) throw new Error(data.error || res.status);
+      if (!data.draws) throw new Error(data.error || res.status);
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       render(data);
     } catch (e) {

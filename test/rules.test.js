@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const R = require('../public/rules.js');
-const { parseDrawCsv, warekiToIso } = require('../server.js');
+const R = require('../rules.js');
+const { parseDrawCsv, warekiToIso } = require('../lib/draws.js');
 
 function fakeDraws(seed) {
   let s = seed;
