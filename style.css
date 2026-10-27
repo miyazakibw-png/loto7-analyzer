@@ -54,3 +54,13 @@ table.horses tr.sel { background: #fdf3e7; }
 .points { font-size: 15px; font-weight: bold; color: #c0392b; }
 ol.combos { font-size: 15px; line-height: 1.9; column-width: 160px; padding-left: 1.6em; }
 .backlink { text-align: center; padding: 12px; }
+
+/* 6法則設定 */
+.laws label { display: block; padding: 5px 0; font-size: 14px; line-height: 1.7; }
+.laws label.sub { padding-left: 1.6em; font-size: 13px; color: #555; }
+.laws select { font-size: 14px; padding: 2px; margin: 0 2px; }
+#posNote { font-size: 12px; }
+.ball.hit { background: #c0392b; color: #fff; }
+.ball.bhit { background: #e67e22; color: #fff; }
+.hitLabel { font-size: 13px; margin-left: 6px; }
+button.del { font-size: 12px; padding: 2px 8px; border: 1px solid #ccc; background: #fff; border-radius: 4px; }

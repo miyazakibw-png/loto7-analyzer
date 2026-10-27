@@ -26,20 +26,39 @@
     <div id="prevBalls" class="balls"></div>
   </section>
 
+  <section class="card" id="secLaws" hidden>
+    <h2>6つの法則の設定</h2>
+    <div class="laws">
+      <label><input type="checkbox" id="lawAxis" checked> ① 軸数字を入れる（直近<select id="axisWindow"><option>24</option><option selected>50</option><option>100</option></select>回でよく出る上位<select id="axisTop"><option>5</option><option selected>10</option><option>15</option></select>個から<select id="axisMin"><option selected>1</option><option>2</option></select>つ以上）</label>
+      <label><input type="checkbox" id="lawDigit" checked> ② 下一桁が同じペアを入れる</label>
+      <label><input type="checkbox" id="lawPrev" checked> ③ 引っ張りを入れる（前回<select id="prevMin"><option selected>1</option><option>2</option></select>つ以上）</label>
+      <label class="sub"><input type="checkbox" id="lawPrev2"> 前々回の数字も対象にする</label>
+      <label><input type="checkbox" id="lawAdj" checked> ④ 前後の数字（±1）を<select id="adjMin"><option selected>1</option><option>2</option></select>つ以上入れる</label>
+      <label><input type="checkbox" id="lawOddEven" checked> ⑤ 奇数と偶数を3対4か4対3にする</label>
+      <label><input type="checkbox" id="lawPos" checked> ⑥ 位置ごとの数字の範囲で絞る</label>
+    </div>
+    <p class="muted" id="posNote">第1数字は1〜15、第7数字は29〜37のように、並べたときの位置で範囲を決めます。</p>
+  </section>
+
   <section class="card" id="secMake" hidden>
     <h2>数字を選ぶ</h2>
     <div class="row">
+      <label>選び方 <select id="mode"><option value="six" selected>6つの法則</option><option value="four">4つの黄金法則（今までの）</option></select></label>
       <label>何通り <select id="sets"><option>1</option><option>3</option><option selected>5</option><option>10</option></select></label>
       <button id="btnMake" class="primary">数字を選ぶ</button>
     </div>
-    <div class="legend">
-      <span><i class="tag hot"></i>①3〜4回</span>
-      <span><i class="tag prev"></i>②引っ張り</span>
-      <span><i class="tag consec"></i>③連続</span>
-      <span><i class="tag digit"></i>④下一桁ペア</span>
-    </div>
+    <div class="legend" id="legend"></div>
     <div id="results"></div>
+    <div class="row" id="saveRow" hidden>
+      <button id="btnSave">この予想を保存</button>
+      <span class="muted">次回（第<span id="nextNo"></span>回）の結果が出たら答え合わせできます</span>
+    </div>
     <p class="note">抽選は毎回ランダムです。この法則で当たりやすくなる保証はありません。</p>
+  </section>
+
+  <section class="card" id="secSaved" hidden>
+    <h2>保存した予想と答え合わせ</h2>
+    <div id="savedList"></div>
   </section>
 
   <section class="card" id="secRule1" hidden>
@@ -62,6 +81,7 @@
 <p class="backlink"><a href="win5.html">WIN5予想へ</a></p>
 </main>
 <script src="rules.js"></script>
+<script src="rules6.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

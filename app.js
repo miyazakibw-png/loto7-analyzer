@@ -1,9 +1,15 @@
 (function () {
-  const VERSION = '0.1.0';
+  const VERSION = '0.2.0';
   const CACHE_KEY = 'loto7-draws';
+  const LAW_KEY = 'loto7-laws';
+  const SAVED_KEY = 'loto7-saved';
   const R = window.Loto7Rules;
+  const R6 = window.Loto7Rules6;
   const $ = (id) => document.getElementById(id);
   let analysis = null;
+  let analysis6 = null;
+  let draws = null;
+  let lastResults = null;
 
   $('ver').textContent = VERSION;
 
@@ -20,9 +26,71 @@
     return `${y}年${m}月${d}日`;
   }
 
+  // --- 6法則の設定 ---
+  function readLawOpt() {
+    return {
+      useAxis: $('lawAxis').checked,
+      axisWindow: +$('axisWindow').value,
+      axisTop: +$('axisTop').value,
+      axisMin: +$('axisMin').value,
+      useDigit: $('lawDigit').checked,
+      usePrev: $('lawPrev').checked,
+      prevMin: +$('prevMin').value,
+      usePrev2: $('lawPrev2').checked,
+      useAdjacent: $('lawAdj').checked,
+      adjMin: +$('adjMin').value,
+      useOddEven: $('lawOddEven').checked,
+      usePos: $('lawPos').checked,
+    };
+  }
+
+  function saveLawOpt() {
+    try { localStorage.setItem(LAW_KEY, JSON.stringify(readLawOpt())); } catch (e) {}
+  }
+
+  function restoreLawOpt() {
+    try {
+      const o = JSON.parse(localStorage.getItem(LAW_KEY));
+      if (!o) return;
+      const map = {
+        lawAxis: 'useAxis', lawDigit: 'useDigit', lawPrev: 'usePrev',
+        lawPrev2: 'usePrev2', lawAdj: 'useAdjacent', lawOddEven: 'useOddEven', lawPos: 'usePos',
+      };
+      for (const [id, k] of Object.entries(map)) if (k in o) $(id).checked = !!o[k];
+      for (const [id, k] of Object.entries({ axisWindow: 'axisWindow', axisTop: 'axisTop', axisMin: 'axisMin', prevMin: 'prevMin', adjMin: 'adjMin' }))
+        if (k in o) $(id).value = String(o[k]);
+    } catch (e) {}
+  }
+
+  ['lawAxis', 'lawDigit', 'lawPrev', 'lawPrev2', 'lawAdj', 'lawOddEven', 'lawPos',
+    'axisWindow', 'axisTop', 'axisMin', 'prevMin', 'adjMin'].forEach((id) => {
+    $(id).addEventListener('change', () => {
+      saveLawOpt();
+      if (draws) analysis6 = R6.analyze(draws, readLawOpt());
+      updateLegend();
+    });
+  });
+
+  function updateLegend() {
+    const mode = $('mode').value;
+    $('legend').innerHTML = mode === 'six'
+      ? '<span><i class="tag hot"></i>①軸数字</span>' +
+        '<span><i class="tag digit"></i>②下一桁ペア</span>' +
+        '<span><i class="tag prev"></i>③引っ張り</span>' +
+        '<span><i class="tag consec"></i>④前後±1</span>' +
+        '<span>⑤奇偶バランスと⑥位置は全体の条件</span>'
+      : '<span><i class="tag hot"></i>①3〜4回</span>' +
+        '<span><i class="tag prev"></i>②引っ張り</span>' +
+        '<span><i class="tag consec"></i>③連続</span>' +
+        '<span><i class="tag digit"></i>④下一桁ペア</span>';
+    $('secLaws').hidden = mode !== 'six' || !analysis;
+  }
+
+  // --- 表示 ---
   function render(data) {
-    const draws = data.draws;
+    draws = data.draws;
     analysis = R.analyze(draws);
+    analysis6 = R6.analyze(draws, readLawOpt());
     const a = analysis;
     const last = a.latest;
     $('status').textContent = `第${last.no}回（${fmtDate(last.date)}）まで取り込み済み`;
@@ -66,21 +134,41 @@
     });
 
     ['secPrev', 'secMake', 'secRule1', 'secRule3', 'secHist'].forEach((id) => ($(id).hidden = false));
+    updateLegend();
+    renderSaved();
+  }
+
+  function addMarks(b, r, n, mode) {
+    const marks = document.createElement('span');
+    marks.className = 'marks';
+    if (mode === 'six') {
+      if (r.axisIn.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
+      if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
+      if (r.adjIn.includes(n)) marks.innerHTML += '<i class="tag consec"></i>';
+      if (new Set(r.digit.flat()).has(n)) marks.innerHTML += '<i class="tag digit"></i>';
+    } else {
+      if (r.hotIn.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
+      if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
+      if (new Set(r.adj.flat()).has(n)) marks.innerHTML += '<i class="tag consec"></i>';
+      if (new Set(r.digit.flat()).has(n)) marks.innerHTML += '<i class="tag digit"></i>';
+    }
+    b.appendChild(marks);
   }
 
   function make() {
     if (!analysis) return;
+    const mode = $('mode').value;
     const sets = +$('sets').value;
-    const list = R.generate(analysis, sets);
+    const list = mode === 'six' ? R6.generate(analysis6, sets) : R.generate(analysis, sets);
+    lastResults = { mode, list };
     const box = $('results');
     box.innerHTML = '';
     if (!list.length) {
-      box.innerHTML = '<p class="err">条件に合う組み合わせが見つかりませんでした。</p>';
+      box.innerHTML = '<p class="err">条件に合う組み合わせが見つかりませんでした。法則の設定をゆるめてみてください。</p>';
+      $('saveRow').hidden = true;
       return;
     }
     list.forEach((r, i) => {
-      const consec = new Set(r.adj.flat());
-      const digit = new Set(r.digit.flat());
       const wrap = document.createElement('div');
       wrap.className = 'set';
       wrap.innerHTML = `<div class="head"><span>${i + 1}通り目</span></div>`;
@@ -88,28 +176,95 @@
       balls.className = 'balls';
       r.nums.forEach((n) => {
         const b = ball(n);
-        const marks = document.createElement('span');
-        marks.className = 'marks';
-        if (r.hotIn.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
-        if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
-        if (consec.has(n)) marks.innerHTML += '<i class="tag consec"></i>';
-        if (digit.has(n)) marks.innerHTML += '<i class="tag digit"></i>';
-        b.appendChild(marks);
+        addMarks(b, r, n, mode);
         balls.appendChild(b);
       });
       wrap.appendChild(balls);
       const why = document.createElement('div');
       why.className = 'why';
-      why.innerHTML = [
-        `①3〜4回：${r.hotIn.map((n) => `${n}（${analysis.counts[n]}回）`).join('・')}`,
-        `②引っ張り：${r.prevIn.join('・')}`,
-        `③連続：${r.adj.map((p) => p.join('-')).join('・')}`,
-        `④下一桁ペア：${r.digit.map((g) => g.join('と')).join('・')}`,
-      ].join('<br>');
+      if (mode === 'six') {
+        const even = r.nums.length - r.odd;
+        why.innerHTML = [
+          `①軸：${r.axisIn.map((n) => `${n}（${analysis6.counts[n]}回）`).join('・') || 'なし'}`,
+          `②下一桁ペア：${r.digit.map((g) => g.join('と')).join('・') || 'なし'}`,
+          `③引っ張り：${r.prevIn.join('・') || 'なし'}`,
+          `④前後±1：${r.adjIn.join('・') || 'なし'}`,
+          `⑤奇偶：奇数${r.odd}・偶数${even}　⑥位置の範囲：${r.posOk ? '範囲内' : '範囲外'}`,
+        ].join('<br>');
+      } else {
+        why.innerHTML = [
+          `①3〜4回：${r.hotIn.map((n) => `${n}（${analysis.counts[n]}回）`).join('・')}`,
+          `②引っ張り：${r.prevIn.join('・')}`,
+          `③連続：${r.adj.map((p) => p.join('-')).join('・')}`,
+          `④下一桁ペア：${r.digit.map((g) => g.join('と')).join('・')}`,
+        ].join('<br>');
+      }
       wrap.appendChild(why);
       box.appendChild(wrap);
     });
+    $('nextNo').textContent = analysis.latest.no + 1;
+    $('saveRow').hidden = false;
   }
+
+  // --- 保存した予想と答え合わせ ---
+  function savedList() {
+    try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || []; } catch (e) { return []; }
+  }
+
+  function renderSaved() {
+    const list = savedList();
+    $('secSaved').hidden = !list.length;
+    const box = $('savedList');
+    box.innerHTML = '';
+    list.forEach((sv, idx) => {
+      const div = document.createElement('div');
+      div.className = 'set';
+      const draw = draws && draws.find((d) => d.no === sv.drawNo);
+      const headTxt = draw
+        ? `第${sv.drawNo}回の予想 → ${draw.main.join(' ')}（${draw.date || ''}）`
+        : `第${sv.drawNo}回の予想（結果待ち）`;
+      div.innerHTML = `<div class="head"><span>${headTxt}</span><button class="del" data-i="${idx}">消す</button></div>`;
+      sv.sets.forEach((nums, i) => {
+        const row = document.createElement('div');
+        row.className = 'balls';
+        const hit = draw ? nums.filter((n) => draw.main.includes(n)) : [];
+        const bhit = draw ? nums.filter((n) => draw.bonus.includes(n)) : [];
+        nums.forEach((n) => {
+          const b = ball(n);
+          if (hit.includes(n)) b.classList.add('hit');
+          if (bhit.includes(n)) b.classList.add('bhit');
+          row.appendChild(b);
+        });
+        const r = document.createElement('span');
+        r.className = 'muted hitLabel';
+        r.textContent = draw ? ` ${hit.length}個一致${bhit.length ? `＋ボーナス${bhit.length}` : ''}` : '';
+        row.appendChild(r);
+        div.appendChild(row);
+      });
+      box.appendChild(div);
+    });
+    box.querySelectorAll('button.del').forEach((b) => {
+      b.addEventListener('click', () => {
+        const l = savedList();
+        l.splice(+b.dataset.i, 1);
+        localStorage.setItem(SAVED_KEY, JSON.stringify(l));
+        renderSaved();
+      });
+    });
+  }
+
+  $('btnSave').addEventListener('click', () => {
+    if (!lastResults || !analysis) return;
+    const l = savedList();
+    l.unshift({
+      drawNo: analysis.latest.no + 1,
+      mode: lastResults.mode,
+      savedAt: new Date().toISOString().slice(0, 10),
+      sets: lastResults.list.map((r) => r.nums),
+    });
+    localStorage.setItem(SAVED_KEY, JSON.stringify(l));
+    renderSaved();
+  });
 
   async function fetchDraws() {
     const btn = $('btnFetch');
@@ -131,6 +286,8 @@
     }
   }
 
+  restoreLawOpt();
+  $('mode').addEventListener('change', updateLegend);
   $('btnFetch').addEventListener('click', fetchDraws);
   $('btnMake').addEventListener('click', make);
 
