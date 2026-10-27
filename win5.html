@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>WIN5予想</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>WIN5予想 <span id="ver">0.1.0</span></h1>
+  <button id="btnFetch" class="primary">最新のオッズを読み込む</button>
+  <div id="status" class="status"></div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>対象レース <small id="dateLabel"></small></h2>
+    <div id="win5Info"></div>
+  </section>
+
+  <section class="card">
+    <h2>買い目を決める</h2>
+    <div id="pickArea"></div>
+    <div class="row">
+      <button id="btnMake" class="primary">組み合わせを出す</button>
+      <span id="points" class="points"></span>
+    </div>
+    <div id="comboList"></div>
+  </section>
+
+  <details class="card">
+    <summary>対象レースの決まり方</summary>
+    <p class="memo">JRAホームページのWIN5対象レース・単勝オッズを取り込んで、各レースの人気順（オッズの低い順）から選んだ馬を組み合わせます。馬は当日（前日）のオッズ次第で変わるので、当日の朝に自動で取り込み直します。</p>
+    <p class="memo">※ 競馬に「当たる法則」はありません。人気順で選んだ組合せは配当が低くなりやすい傾向があります。参考程度に使ってください。</p>
+  </details>
+  <p class="backlink"><a href="index.html">ロト7予想へ戻る</a></p>
+</main>
+<script src="win5.js"></script>
+</body>
+</html>

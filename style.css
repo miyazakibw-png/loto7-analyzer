@@ -37,3 +37,20 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px
 th, td { border-bottom: 1px solid #eee; padding: 4px; text-align: left; }
 summary { font-weight: 700; cursor: pointer; }
 .err { color: #c0392b; }
+
+/* WIN5 */
+.race { border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px; }
+.raceHead { font-size: 14px; margin-bottom: 6px; }
+.raceHead small { color: #666; }
+table.horses { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.horses th, table.horses td { padding: 4px 6px; border-bottom: 1px solid #f0f0f0; text-align: left; }
+table.horses th { color: #888; font-weight: normal; font-size: 12px; }
+table.horses td.pop { width: 2.2em; color: #c0392b; font-weight: bold; }
+table.horses td.uma { font-weight: bold; }
+table.horses td.od { text-align: right; }
+table.horses tr.sel { background: #fdf3e7; }
+.pickRow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 14px; }
+.pickRow select { font-size: 15px; padding: 4px; }
+.points { font-size: 15px; font-weight: bold; color: #c0392b; }
+ol.combos { font-size: 15px; line-height: 1.9; column-width: 160px; padding-left: 1.6em; }
+.backlink { text-align: center; padding: 12px; }

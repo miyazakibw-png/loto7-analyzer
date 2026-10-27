@@ -1,0 +1,30 @@
+name: WIN5オッズの取り込み
+on:
+  push:
+    paths-ignore:
+      - "data/win5.json"
+  schedule:
+    - cron: '0 11 * * 4,5,6,0'   # 開催前日の夜 20:00 JST（前日オッズ）
+    - cron: '0 23 * * 4,5,6'     # 開催日の朝 08:00 JST
+    - cron: '30 4 * * 6,0,1'     # 開催日の昼 13:30 JST（締切前）
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: node scripts/fetch-win5.js
+      - name: commit if changed
+        run: |
+          if git diff --quiet data/win5.json; then
+            echo "no change"; exit 0
+          fi
+          git config user.name "loto7-bot"
+          git config user.email "loto7-bot@users.noreply.github.com"
+          git add data/win5.json
+          git commit -m "WIN5オッズを更新（$(node -e "console.log(require('./data/win5.json').date)")）"
+          git push origin HEAD:main
