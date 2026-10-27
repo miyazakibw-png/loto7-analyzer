@@ -74,7 +74,7 @@
 
   function updateLegend() {
     const mode = $('mode').value;
-    $('legend').innerHTML = mode === 'six'
+    $('legend').innerHTML = mode !== 'four'
       ? '<span><i class="tag hot"></i>①軸数字</span>' +
         '<span><i class="tag digit"></i>②下一桁ペア</span>' +
         '<span><i class="tag prev"></i>③引っ張り</span>' +
@@ -84,7 +84,7 @@
         '<span><i class="tag prev"></i>②引っ張り</span>' +
         '<span><i class="tag consec"></i>③連続</span>' +
         '<span><i class="tag digit"></i>④下一桁ペア</span>';
-    $('secLaws').hidden = mode !== 'six' || !analysis;
+    $('secLaws').hidden = mode === 'four' || !analysis;
   }
 
   // --- 表示 ---
@@ -142,7 +142,7 @@
   function addMarks(b, r, n, mode) {
     const marks = document.createElement('span');
     marks.className = 'marks';
-    if (mode === 'six') {
+    if (mode === 'six' || mode === 'both') {
       if (r.axisIn.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
       if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
       if (r.adjIn.includes(n)) marks.innerHTML += '<i class="tag consec"></i>';
@@ -156,11 +156,33 @@
     b.appendChild(marks);
   }
 
+  // 6法則＋4法則の両方に合う組を作る
+  function generateBoth(sets) {
+    const out = [];
+    const seen = new Set();
+    for (let t = 0; t < 300000 && out.length < sets; t++) {
+      const nums = R6.makeOne(analysis6, Math.random);
+      if (!nums) continue;
+      const key = nums.join(',');
+      if (seen.has(key)) continue;
+      const c6 = R6.check(nums, analysis6);
+      if (!c6.ok) continue;
+      const c4 = R.check(nums, analysis);
+      if (!c4.ok) continue;
+      seen.add(key);
+      out.push({ nums, ...c6, _c4: c4 });
+    }
+    return out;
+  }
+
   function make() {
     if (!analysis) return;
     const mode = $('mode').value;
     const sets = +$('sets').value;
-    const list = mode === 'six' ? R6.generate(analysis6, sets) : R.generate(analysis, sets);
+    let list;
+    if (mode === 'six') list = R6.generate(analysis6, sets);
+    else if (mode === 'both') list = generateBoth(sets);
+    else list = R.generate(analysis, sets);
     lastResults = { mode, list };
     const box = $('results');
     box.innerHTML = '';
@@ -183,7 +205,7 @@
       wrap.appendChild(balls);
       const why = document.createElement('div');
       why.className = 'why';
-      if (mode === 'six') {
+      if (mode === 'six' || mode === 'both') {
         const even = r.nums.length - r.odd;
         why.innerHTML = [
           `①軸：${r.axisIn.map((n) => `${n}（${analysis6.counts[n]}回）`).join('・') || 'なし'}`,
@@ -191,6 +213,7 @@
           `③引っ張り：${r.prevIn.join('・') || 'なし'}`,
           `④前後±1：${r.adjIn.join('・') || 'なし'}`,
           `⑤奇偶：奇数${r.odd}・偶数${even}　⑥位置の範囲：${r.posOk ? '範囲内' : '範囲外'}　⑦連続：${r.consec.map((p) => p.join('-')).join('・') || 'なし'}`,
+          mode === 'both' ? `＋4法則：3〜4回${r._c4.hotIn.join('・')}／連続${r._c4.adj.map((p) => p.join('-')).join('・')}` : '',
         ].join('<br>');
       } else {
         why.innerHTML = [

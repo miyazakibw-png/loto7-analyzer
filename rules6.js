@@ -126,7 +126,7 @@
     return out;
   }
 
-  const api = { MAX, PICK, POS_RANGE, DEFAULTS, analyze, check, generate, sameDigitGroups };
+  const api = { MAX, PICK, POS_RANGE, DEFAULTS, analyze, check, generate, makeOne, sameDigitGroups };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Loto7Rules6 = api;
 })(this);
