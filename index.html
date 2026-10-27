@@ -27,7 +27,7 @@
   </section>
 
   <section class="card" id="secLaws" hidden>
-    <h2>6つの法則の設定</h2>
+    <h2>法則の設定（必要なものにチェック）</h2>
     <div class="laws">
       <label><input type="checkbox" id="lawAxis" checked> ① 軸数字を入れる（直近<select id="axisWindow"><option>24</option><option selected>50</option><option>100</option></select>回でよく出る上位<select id="axisTop"><option>5</option><option selected>10</option><option>15</option></select>個から<select id="axisMin"><option selected>1</option><option>2</option></select>つ以上）</label>
       <label><input type="checkbox" id="lawDigit" checked> ② 下一桁が同じペアを入れる</label>
@@ -37,6 +37,11 @@
       <label><input type="checkbox" id="lawOddEven" checked> ⑤ 奇数と偶数を3対4か4対3にする</label>
       <label><input type="checkbox" id="lawPos" checked> ⑥ 位置ごとの数字の範囲で絞る</label>
       <label><input type="checkbox" id="lawConsec" checked> ⑦ 連続する数字（例：15と16）を1組入れる</label>
+      <p class="muted" style="margin:8px 0 2px">4つの黄金法則（今までの条件）</p>
+      <label><input type="checkbox" id="lawGold1"> 黄金① 直近24回で3〜4回出た数字を3個入れる</label>
+      <label><input type="checkbox" id="lawGold2"> 黄金② 前回の数字を1〜2個入れる</label>
+      <label><input type="checkbox" id="lawGold3"> 黄金③ 前回数字の前後から連続1組だけ</label>
+      <label><input type="checkbox" id="lawGold4"> 黄金④ 下一桁が同じペアを入れる（②と同じ条件）</label>
     </div>
     <p class="muted" id="posNote">第1数字は1〜15、第7数字は29〜37のように、並べたときの位置で範囲を決めます。</p>
   </section>
@@ -44,7 +49,6 @@
   <section class="card" id="secMake" hidden>
     <h2>数字を選ぶ</h2>
     <div class="row">
-      <label>選び方 <select id="mode"><option value="six" selected>6つの法則</option><option value="both">6つ＋4つ全部</option><option value="four">4つの黄金法則（今までの）</option></select></label>
       <label>何通り <select id="sets"><option>1</option><option>3</option><option selected>5</option><option>10</option></select></label>
       <button id="btnMake" class="primary">数字を選ぶ</button>
     </div>

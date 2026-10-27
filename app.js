@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
   const CACHE_KEY = 'loto7-draws';
   const LAW_KEY = 'loto7-laws';
   const SAVED_KEY = 'loto7-saved';
@@ -42,6 +42,10 @@
       useOddEven: $('lawOddEven').checked,
       usePos: $('lawPos').checked,
       useConsec: $('lawConsec').checked,
+      useGold1: $('lawGold1').checked,
+      useGold2: $('lawGold2').checked,
+      useGold3: $('lawGold3').checked,
+      useGold4: $('lawGold4').checked,
     };
   }
 
@@ -55,7 +59,7 @@
       if (!o) return;
       const map = {
         lawAxis: 'useAxis', lawDigit: 'useDigit', lawPrev: 'usePrev',
-        lawPrev2: 'usePrev2', lawAdj: 'useAdjacent', lawOddEven: 'useOddEven', lawPos: 'usePos', lawConsec: 'useConsec',
+        lawPrev2: 'usePrev2', lawAdj: 'useAdjacent', lawOddEven: 'useOddEven', lawPos: 'usePos', lawConsec: 'useConsec', lawGold1: 'useGold1', lawGold2: 'useGold2', lawGold3: 'useGold3', lawGold4: 'useGold4',
       };
       for (const [id, k] of Object.entries(map)) if (k in o) $(id).checked = !!o[k];
       for (const [id, k] of Object.entries({ axisWindow: 'axisWindow', axisTop: 'axisTop', axisMin: 'axisMin', prevMin: 'prevMin', adjMin: 'adjMin' }))
@@ -64,7 +68,7 @@
   }
 
   ['lawAxis', 'lawDigit', 'lawPrev', 'lawPrev2', 'lawAdj', 'lawOddEven', 'lawPos',
-    'axisWindow', 'axisTop', 'axisMin', 'prevMin', 'adjMin', 'lawConsec'].forEach((id) => {
+    'axisWindow', 'axisTop', 'axisMin', 'prevMin', 'adjMin', 'lawConsec', 'lawGold1', 'lawGold2', 'lawGold3', 'lawGold4'].forEach((id) => {
     $(id).addEventListener('change', () => {
       saveLawOpt();
       if (draws) analysis6 = R6.analyze(draws, readLawOpt());
@@ -73,18 +77,13 @@
   });
 
   function updateLegend() {
-    const mode = $('mode').value;
-    $('legend').innerHTML = mode !== 'four'
-      ? '<span><i class="tag hot"></i>①軸数字</span>' +
-        '<span><i class="tag digit"></i>②下一桁ペア</span>' +
-        '<span><i class="tag prev"></i>③引っ張り</span>' +
-        '<span><i class="tag consec"></i>④前後±1</span>' +
-        '<span>⑤奇偶・⑥位置・⑦連続は全体の条件</span>'
-      : '<span><i class="tag hot"></i>①3〜4回</span>' +
-        '<span><i class="tag prev"></i>②引っ張り</span>' +
-        '<span><i class="tag consec"></i>③連続</span>' +
-        '<span><i class="tag digit"></i>④下一桁ペア</span>';
-    $('secLaws').hidden = mode === 'four' || !analysis;
+    $('legend').innerHTML =
+      '<span><i class="tag hot"></i>軸・黄金①</span>' +
+      '<span><i class="tag digit"></i>下一桁ペア</span>' +
+      '<span><i class="tag prev"></i>引っ張り</span>' +
+      '<span><i class="tag consec"></i>前後±1・連続</span>' +
+      '<span>奇偶・位置は全体の条件</span>';
+    $('secLaws').hidden = !analysis;
   }
 
   // --- 表示 ---
@@ -139,51 +138,21 @@
     renderSaved();
   }
 
-  function addMarks(b, r, n, mode) {
+  function addMarks(b, r, n) {
     const marks = document.createElement('span');
     marks.className = 'marks';
-    if (mode === 'six' || mode === 'both') {
-      if (r.axisIn.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
-      if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
-      if (r.adjIn.includes(n)) marks.innerHTML += '<i class="tag consec"></i>';
-      if (new Set(r.digit.flat()).has(n)) marks.innerHTML += '<i class="tag digit"></i>';
-    } else {
-      if (r.hotIn.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
-      if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
-      if (new Set(r.adj.flat()).has(n)) marks.innerHTML += '<i class="tag consec"></i>';
-      if (new Set(r.digit.flat()).has(n)) marks.innerHTML += '<i class="tag digit"></i>';
-    }
+    if (r.axisIn.includes(n) || r.gold1In.includes(n)) marks.innerHTML += '<i class="tag hot"></i>';
+    if (r.prevIn.includes(n)) marks.innerHTML += '<i class="tag prev"></i>';
+    if (r.adjIn.includes(n) || new Set(r.consec.flat()).has(n)) marks.innerHTML += '<i class="tag consec"></i>';
+    if (new Set(r.digit.flat()).has(n)) marks.innerHTML += '<i class="tag digit"></i>';
     b.appendChild(marks);
-  }
-
-  // 6法則＋4法則の両方に合う組を作る
-  function generateBoth(sets) {
-    const out = [];
-    const seen = new Set();
-    for (let t = 0; t < 300000 && out.length < sets; t++) {
-      const nums = R6.makeOne(analysis6, Math.random);
-      if (!nums) continue;
-      const key = nums.join(',');
-      if (seen.has(key)) continue;
-      const c6 = R6.check(nums, analysis6);
-      if (!c6.ok) continue;
-      const c4 = R.check(nums, analysis);
-      if (!c4.ok) continue;
-      seen.add(key);
-      out.push({ nums, ...c6, _c4: c4 });
-    }
-    return out;
   }
 
   function make() {
     if (!analysis) return;
-    const mode = $('mode').value;
     const sets = +$('sets').value;
-    let list;
-    if (mode === 'six') list = R6.generate(analysis6, sets);
-    else if (mode === 'both') list = generateBoth(sets);
-    else list = R.generate(analysis, sets);
-    lastResults = { mode, list };
+    const list = R6.generate(analysis6, sets);
+    lastResults = { list };
     const box = $('results');
     box.innerHTML = '';
     if (!list.length) {
@@ -199,30 +168,21 @@
       balls.className = 'balls';
       r.nums.forEach((n) => {
         const b = ball(n);
-        addMarks(b, r, n, mode);
+        addMarks(b, r, n);
         balls.appendChild(b);
       });
       wrap.appendChild(balls);
       const why = document.createElement('div');
       why.className = 'why';
-      if (mode === 'six' || mode === 'both') {
-        const even = r.nums.length - r.odd;
-        why.innerHTML = [
-          `①軸：${r.axisIn.map((n) => `${n}（${analysis6.counts[n]}回）`).join('・') || 'なし'}`,
-          `②下一桁ペア：${r.digit.map((g) => g.join('と')).join('・') || 'なし'}`,
-          `③引っ張り：${r.prevIn.join('・') || 'なし'}`,
-          `④前後±1：${r.adjIn.join('・') || 'なし'}`,
-          `⑤奇偶：奇数${r.odd}・偶数${even}　⑥位置の範囲：${r.posOk ? '範囲内' : '範囲外'}　⑦連続：${r.consec.map((p) => p.join('-')).join('・') || 'なし'}`,
-          mode === 'both' ? `＋4法則：3〜4回${r._c4.hotIn.join('・')}／連続${r._c4.adj.map((p) => p.join('-')).join('・')}` : '',
-        ].join('<br>');
-      } else {
-        why.innerHTML = [
-          `①3〜4回：${r.hotIn.map((n) => `${n}（${analysis.counts[n]}回）`).join('・')}`,
-          `②引っ張り：${r.prevIn.join('・')}`,
-          `③連続：${r.adj.map((p) => p.join('-')).join('・')}`,
-          `④下一桁ペア：${r.digit.map((g) => g.join('と')).join('・')}`,
-        ].join('<br>');
-      }
+      const even = r.nums.length - r.odd;
+      why.innerHTML = [
+        `①軸：${r.axisIn.map((n) => `${n}（${analysis6.counts[n]}回）`).join('・') || 'なし'}`,
+        `②下一桁ペア：${r.digit.map((g) => g.join('と')).join('・') || 'なし'}`,
+        `③引っ張り：${r.prevIn.join('・') || 'なし'}`,
+        `④前後±1：${r.adjIn.join('・') || 'なし'}`,
+        `⑤奇偶：奇数${r.odd}・偶数${even}　⑥位置の範囲：${r.posOk ? '範囲内' : '範囲外'}　⑦連続：${r.consec.map((p) => p.join('-')).join('・') || 'なし'}`,
+        `黄金①3〜4回：${r.gold1In.join('・') || 'なし'}`,
+      ].join('<br>');
       wrap.appendChild(why);
       box.appendChild(wrap);
     });
@@ -282,7 +242,6 @@
     const l = savedList();
     l.unshift({
       drawNo: analysis.latest.no + 1,
-      mode: lastResults.mode,
       savedAt: new Date().toISOString().slice(0, 10),
       sets: lastResults.list.map((r) => r.nums),
     });
@@ -311,7 +270,6 @@
   }
 
   restoreLawOpt();
-  $('mode').addEventListener('change', updateLegend);
   $('btnFetch').addEventListener('click', fetchDraws);
   $('btnMake').addEventListener('click', make);
 

@@ -20,6 +20,10 @@
     useOddEven: true,   // ⑤奇偶3:4か4:3
     usePos: true,       // ⑥位置ごとの範囲
     useConsec: true,    // ⑦連続数字を1組入れる
+    useGold1: false,    // 黄金①直近24回で3〜4回の数字を3個
+    useGold2: false,    // 黄金②前回数字を1〜2個
+    useGold3: false,    // 黄金③前回数字の前後から連続1組だけ
+    useGold4: false,    // 黄金④下一桁ペア
   };
 
   function analyze(draws, opt) {
@@ -38,10 +42,22 @@
       if (n - 1 >= 1) adjPool.add(n - 1);
       if (n + 1 <= MAX) adjPool.add(n + 1);
     }
+    // 黄金法則用：直近24回で3〜4回の数字 / 前回数字の前後から作る連続の候補
+    const hot24 = [];
+    const c24 = Array(MAX + 1).fill(0);
+    for (const d of draws.slice(0, 24)) for (const n of d.main) c24[n]++;
+    for (let n = 1; n <= MAX; n++) if (c24[n] >= 3 && c24[n] <= 4) hot24.push(n);
+    const pairKeys = new Set();
+    if (draws[0]) for (const n of draws[0].main) {
+      if (n - 1 >= 1) pairKeys.add(n - 1);
+      if (n + 1 <= MAX) pairKeys.add(n);
+    }
     return {
       opt, counts, axis,
       prevSet: [...prevSet],
       adjPool: [...adjPool],
+      hot24,
+      consecPairStarts: pairKeys,
       latest: draws[0] || null,
     };
   }
@@ -60,6 +76,7 @@
     const digit = sameDigitGroups(s);
     const consec = [];
     for (let i = 0; i < s.length - 1; i++) if (s[i + 1] === s[i] + 1) consec.push([s[i], s[i + 1]]);
+    const gold1In = s.filter((n) => a.hot24.includes(n));
     const odd = s.filter((n) => n % 2 === 1).length;
     const posOk = s.every((n, i) => n >= POS_RANGE[i][0] && n <= POS_RANGE[i][1]);
     const o = a.opt;
@@ -70,8 +87,12 @@
       (!o.useAdjacent || adjIn.length >= o.adjMin) &&
       (!o.useOddEven || (odd === 3 || odd === 4)) &&
       (!o.usePos || posOk) &&
-      (!o.useConsec || consec.length >= 1);
-    return { ok, axisIn, prevIn, adjIn, digit, odd, posOk, consec };
+      (!o.useConsec || consec.length >= 1) &&
+      (!o.useGold1 || gold1In.length === Math.min(3, a.hot24.length)) &&
+      (!o.useGold2 || (prevIn.length >= 1 && prevIn.length <= 2)) &&
+      (!o.useGold3 || (consec.length === 1 && a.consecPairStarts.has(consec[0][0]))) &&
+      (!o.useGold4 || digit.length >= 1);
+    return { ok, axisIn, prevIn, adjIn, digit, odd, posOk, consec, gold1In };
   }
 
   function sample(arr, k, rng) {
