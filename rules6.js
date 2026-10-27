@@ -19,6 +19,7 @@
     adjMin: 1,
     useOddEven: true,   // ⑤奇偶3:4か4:3
     usePos: true,       // ⑥位置ごとの範囲
+    useConsec: true,    // ⑦連続数字を1組入れる
   };
 
   function analyze(draws, opt) {
@@ -57,6 +58,8 @@
     const prevIn = s.filter((n) => a.prevSet.includes(n));
     const adjIn = s.filter((n) => a.adjPool.includes(n));
     const digit = sameDigitGroups(s);
+    const consec = [];
+    for (let i = 0; i < s.length - 1; i++) if (s[i + 1] === s[i] + 1) consec.push([s[i], s[i + 1]]);
     const odd = s.filter((n) => n % 2 === 1).length;
     const posOk = s.every((n, i) => n >= POS_RANGE[i][0] && n <= POS_RANGE[i][1]);
     const o = a.opt;
@@ -66,8 +69,9 @@
       (!o.usePrev || prevIn.length >= o.prevMin) &&
       (!o.useAdjacent || adjIn.length >= o.adjMin) &&
       (!o.useOddEven || (odd === 3 || odd === 4)) &&
-      (!o.usePos || posOk);
-    return { ok, axisIn, prevIn, adjIn, digit, odd, posOk };
+      (!o.usePos || posOk) &&
+      (!o.useConsec || consec.length >= 1);
+    return { ok, axisIn, prevIn, adjIn, digit, odd, posOk, consec };
   }
 
   function sample(arr, k, rng) {

@@ -41,6 +41,7 @@
       adjMin: +$('adjMin').value,
       useOddEven: $('lawOddEven').checked,
       usePos: $('lawPos').checked,
+      useConsec: $('lawConsec').checked,
     };
   }
 
@@ -54,7 +55,7 @@
       if (!o) return;
       const map = {
         lawAxis: 'useAxis', lawDigit: 'useDigit', lawPrev: 'usePrev',
-        lawPrev2: 'usePrev2', lawAdj: 'useAdjacent', lawOddEven: 'useOddEven', lawPos: 'usePos',
+        lawPrev2: 'usePrev2', lawAdj: 'useAdjacent', lawOddEven: 'useOddEven', lawPos: 'usePos', lawConsec: 'useConsec',
       };
       for (const [id, k] of Object.entries(map)) if (k in o) $(id).checked = !!o[k];
       for (const [id, k] of Object.entries({ axisWindow: 'axisWindow', axisTop: 'axisTop', axisMin: 'axisMin', prevMin: 'prevMin', adjMin: 'adjMin' }))
@@ -63,7 +64,7 @@
   }
 
   ['lawAxis', 'lawDigit', 'lawPrev', 'lawPrev2', 'lawAdj', 'lawOddEven', 'lawPos',
-    'axisWindow', 'axisTop', 'axisMin', 'prevMin', 'adjMin'].forEach((id) => {
+    'axisWindow', 'axisTop', 'axisMin', 'prevMin', 'adjMin', 'lawConsec'].forEach((id) => {
     $(id).addEventListener('change', () => {
       saveLawOpt();
       if (draws) analysis6 = R6.analyze(draws, readLawOpt());
@@ -78,7 +79,7 @@
         '<span><i class="tag digit"></i>②下一桁ペア</span>' +
         '<span><i class="tag prev"></i>③引っ張り</span>' +
         '<span><i class="tag consec"></i>④前後±1</span>' +
-        '<span>⑤奇偶バランスと⑥位置は全体の条件</span>'
+        '<span>⑤奇偶・⑥位置・⑦連続は全体の条件</span>'
       : '<span><i class="tag hot"></i>①3〜4回</span>' +
         '<span><i class="tag prev"></i>②引っ張り</span>' +
         '<span><i class="tag consec"></i>③連続</span>' +
@@ -189,7 +190,7 @@
           `②下一桁ペア：${r.digit.map((g) => g.join('と')).join('・') || 'なし'}`,
           `③引っ張り：${r.prevIn.join('・') || 'なし'}`,
           `④前後±1：${r.adjIn.join('・') || 'なし'}`,
-          `⑤奇偶：奇数${r.odd}・偶数${even}　⑥位置の範囲：${r.posOk ? '範囲内' : '範囲外'}`,
+          `⑤奇偶：奇数${r.odd}・偶数${even}　⑥位置の範囲：${r.posOk ? '範囲内' : '範囲外'}　⑦連続：${r.consec.map((p) => p.join('-')).join('・') || 'なし'}`,
         ].join('<br>');
       } else {
         why.innerHTML = [
