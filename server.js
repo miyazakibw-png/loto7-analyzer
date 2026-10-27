@@ -19,7 +19,7 @@ const server = http.createServer(async (req, res) => {
     const count = Math.min(Math.max(+url.searchParams.get('count') || 30, 1), 60);
     try {
       const draws = await getDraws(count);
-      send(res, 200, JSON.stringify({ source: 'みずほ銀行 当せん番号案内', fetchedAt: new Date().toISOString(), draws }), MIME['.json']);
+      send(res, 200, JSON.stringify({ source: 'ロト7当選番号データ（loto-life）', fetchedAt: new Date().toISOString(), draws }), MIME['.json']);
     } catch (e) {
       send(res, 502, JSON.stringify({ error: String(e.message || e) }), MIME['.json']);
     }
