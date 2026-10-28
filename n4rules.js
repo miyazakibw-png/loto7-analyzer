@@ -8,9 +8,11 @@
     [9, 1, 5, 2, 8],   // 一の位
   ];
   const AVOID = [[6], [0], [6], [7]]; // 千・百・十・一
+  const PAT_NAMES = { single: 'シングル', double: 'ダブル', ddouble: 'ダブルダブル', triple: 'トリプル', quad: 'ゾロ目' };
   const DEFAULTS = {
     useSum: true,       // ①合計10〜26
     patterns: { '2-2': true, '1-3': true, '3-1': false, '4-0': false, '0-4': false }, // 偶-奇
+    pats: { single: true, double: true, ddouble: false, triple: false, quad: false }, // ⑤同じ数字の重なり
     useAvoid: true,     // ④避ける数字を外す
   };
 
@@ -24,18 +26,32 @@
   }
   function hasAvoid(ds) { return ds.some((d, i) => AVOID[i].includes(d)); }
 
+  // 同じ数字の重なり方: single=全部バラバラ / double=2つ同じ / ddouble=2組 / triple=3つ同じ / quad=ゾロ目
+  function patOf(ds) {
+    const seen = {};
+    ds.forEach((d) => { seen[d] = (seen[d] || 0) + 1; });
+    const counts = Object.values(seen).sort((a, b) => b - a);
+    if (counts[0] === 4) return 'quad';
+    if (counts[0] === 3) return 'triple';
+    if (counts[0] === 2) return counts.length === 2 ? 'ddouble' : 'double';
+    return 'single';
+  }
+
   function check(num, opt) {
     const ds = digits(num);
     const S = sum(ds);
     const ev = evens(ds);
     const odd = 4 - ev;
     const patOk = !!opt.patterns[`${ev}-${odd}`];
+    const pat = patOf(ds);
+    const pat2Ok = !opt.pats || !!opt.pats[pat];
     const avoid = hasAvoid(ds);
     const ok =
       (!opt.useSum || (S >= 10 && S <= 26)) &&
       patOk &&
+      pat2Ok &&
       (!opt.useAvoid || !avoid);
-    return { ok, ds, sum: S, evens: ev, score: score(ds), avoided: avoid };
+    return { ok, ds, sum: S, evens: ev, score: score(ds), avoided: avoid, pat };
   }
 
   // 条件に合う全組み合わせ（スコア順）
@@ -65,7 +81,7 @@
     return { list: out, total: list.length };
   }
 
-  const api = { HOT, AVOID, DEFAULTS, digits, sum, score, check, candidates, generate };
+  const api = { HOT, AVOID, PAT_NAMES, DEFAULTS, digits, sum, score, patOf, check, candidates, generate };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Num4Rules = api;
 })(this);

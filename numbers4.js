@@ -1,5 +1,5 @@
 (function () {
-  const VERSION = '0.1.0';
+  const VERSION = '0.2.0';
   const CACHE_KEY = 'n4-draws';
   const LAW_KEY = 'n4-laws';
   const SAVED_KEY = 'n4-saved';
@@ -25,6 +25,11 @@
         '2-2': $('pat22').checked, '1-3': $('pat13').checked,
         '0-4': $('pat04').checked,
       },
+      pats: {
+        single: $('patSingle').checked, double: $('patDouble').checked,
+        ddouble: $('patDDouble').checked, triple: $('patTriple').checked,
+        quad: $('patQuad').checked,
+      },
     };
   }
 
@@ -45,10 +50,17 @@
         $('pat13').checked = !!o.patterns['1-3'];
         $('pat04').checked = !!o.patterns['0-4'];
       }
+      if (o.pats) {
+        $('patSingle').checked = !!o.pats.single;
+        $('patDouble').checked = !!o.pats.double;
+        $('patDDouble').checked = !!o.pats.ddouble;
+        $('patTriple').checked = !!o.pats.triple;
+        $('patQuad').checked = !!o.pats.quad;
+      }
     } catch (e) {}
   }
 
-  ['lawSum', 'lawAvoid', 'pat40', 'pat31', 'pat22', 'pat13', 'pat04'].forEach((id) => {
+  ['lawSum', 'lawAvoid', 'pat40', 'pat31', 'pat22', 'pat13', 'pat04', 'patSingle', 'patDouble', 'patDDouble', 'patTriple', 'patQuad'].forEach((id) => {
     $(id).addEventListener('change', () => { saveOpt(); updateMatchCount(); });
   });
 
@@ -111,7 +123,7 @@
       const row = numRow(r.num, r.ds);
       const why = document.createElement('span');
       why.className = 'muted hitLabel';
-      why.textContent = `合計${r.sum}・偶数${r.evens}/奇数${4 - r.evens}`;
+      why.textContent = `合計${r.sum}・偶数${r.evens}/奇数${4 - r.evens}・${R.PAT_NAMES[r.pat] || r.pat}`;
       wrap.appendChild(row);
       wrap.appendChild(why);
       box.appendChild(wrap);
