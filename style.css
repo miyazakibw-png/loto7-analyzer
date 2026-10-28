@@ -75,3 +75,11 @@ button.del { font-size: 12px; padding: 2px 8px; border: 1px solid #ccc; backgrou
 .topList .n4 { margin-right: 10px; white-space: nowrap; }
 .topList .n4 i { font-style: normal; color: #c0392b; font-size: 12px; }
 .head .score { color: #c0392b; font-weight: bold; }
+
+/* WIN5ページ：JRA風の緑 */
+body.jra header { background: #0b6e3a; }
+body.jra button.primary { background: #0b6e3a; border-color: #0b6e3a; }
+body.jra table.horses td.pop { color: #0b6e3a; }
+body.jra table.horses tr.sel { background: #e6f4eb; }
+body.jra .points { color: #0b6e3a; }
+body.jra .err { color: #0b6e3a; }
