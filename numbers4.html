@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ナンバーズ4予想">
+<meta name="theme-color" content="#c0392b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<title>ナンバーズ4予想</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><h1>ナンバーズ4予想 <span id="ver"></span></h1></header>
+<main>
+  <section class="card">
+    <div class="row">
+      <button id="btnFetch" class="primary">当選番号を取り込む</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </section>
+
+  <section class="card" id="secPrev" hidden>
+    <h2>前回の当選番号 <small id="prevLabel"></small></h2>
+    <div id="prevNum" class="numBig"></div>
+  </section>
+
+  <section class="card" id="secLaws" hidden>
+    <h2>法則の設定（必要なものにチェック）</h2>
+    <div class="laws">
+      <label><input type="checkbox" id="lawSum" checked> ① 合計が10〜26の数字だけ（中間層）</label>
+      <div>
+        ② 奇数と偶数の組み合わせ：
+        <label class="sub"><input type="checkbox" id="pat22" checked> 偶数2・奇数2（最頻出）</label>
+        <label class="sub"><input type="checkbox" id="pat13" checked> 偶数1・奇数3</label>
+        <label class="sub"><input type="checkbox" id="pat31"> 偶数3・奇数1</label>
+        <label class="sub"><input type="checkbox" id="pat40"> 偶数4・奇数0</label>
+        <label class="sub"><input type="checkbox" id="pat04"> 偶数0・奇数4</label>
+      </div>
+      <label><input type="checkbox" id="lawAvoid" checked> ④ 避ける数字を外す（千位6・百位0・十位6・一位7）</label>
+      <p class="muted">③ 各桁の「よく出る数字」は、組み合わせのスコア（何個入っているか）に使います。スコアが高い順に並びます。<br>
+      千位：6,2,8,3,0　百位：9,3,5,1,7　十位：9,0,8,7,5　一位：9,1,5,2,8</p>
+    </div>
+  </section>
+
+  <section class="card" id="secMake" hidden>
+    <h2>数字を選ぶ</h2>
+    <p class="memo" id="matchCount"></p>
+    <div class="row">
+      <label>何通り <select id="sets"><option>1</option><option>3</option><option selected>5</option><option>10</option></select></label>
+      <button id="btnMake" class="primary">数字を選ぶ</button>
+    </div>
+    <div class="legend"><span><i class="tag hot"></i>③よく出る数字の桁</span><span>各組の右の★はスコア（最大4）</span></div>
+    <div id="results"></div>
+    <div class="row" id="saveRow" hidden>
+      <button id="btnSave">この予想を保存</button>
+      <span class="muted">次回（第<span id="nextNo"></span>回）の結果が出たら答え合わせできます</span>
+    </div>
+    <details>
+      <summary>条件に合う組み合わせの上位（スコア順）</summary>
+      <div id="topList" class="topList"></div>
+    </details>
+    <p class="note">抽選は毎回ランダムです。この法則で当たりやすくなる保証はありません。</p>
+  </section>
+
+  <section class="card" id="secSaved" hidden>
+    <h2>保存した予想と答え合わせ</h2>
+    <div id="savedList"></div>
+  </section>
+
+  <section class="card" id="secHist" hidden>
+    <details>
+      <summary>取り込んだ当選番号（直近30回）</summary>
+      <table id="histTable"><thead><tr><th>回</th><th>日付</th><th>番号</th></tr></thead><tbody></tbody></table>
+    </details>
+  </section>
+  <p class="backlink"><a href="index.html">ロト7予想へ</a>　<a href="win5.html">WIN5予想へ</a></p>
+</main>
+<script src="n4rules.js"></script>
+<script src="numbers4.js"></script>
+</body>
+</html>

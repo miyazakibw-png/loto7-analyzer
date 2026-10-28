@@ -64,3 +64,14 @@ ol.combos { font-size: 15px; line-height: 1.9; column-width: 160px; padding-left
 .ball.bhit { background: #e67e22; color: #fff; }
 .hitLabel { font-size: 13px; margin-left: 6px; }
 button.del { font-size: 12px; padding: 2px 8px; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
+
+/* ナンバーズ4 */
+.numBig { font-size: 34px; font-weight: bold; letter-spacing: 8px; color: #c0392b; }
+.n4d { display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border: 1px solid #bbb; border-radius: 6px; margin-right: 4px; font-size: 16px; background: #fff; }
+.n4d.hot { border-color: #c0392b; color: #c0392b; font-weight: bold; }
+.n4d.hit { background: #c0392b; color: #fff; border-color: #c0392b; }
+.n4set { display: inline-block; }
+.topList { font-size: 14px; line-height: 2; column-width: 110px; padding: 6px 0; }
+.topList .n4 { margin-right: 10px; white-space: nowrap; }
+.topList .n4 i { font-style: normal; color: #c0392b; font-size: 12px; }
+.head .score { color: #c0392b; font-weight: bold; }
