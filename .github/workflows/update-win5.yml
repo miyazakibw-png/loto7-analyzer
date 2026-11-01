@@ -6,6 +6,7 @@ on:
   schedule:
     - cron: '0 11 * * 4,5,6,0'   # 開催前日の夜 20:00 JST（前日オッズ）
     - cron: '0 23 * * 4,5,6'     # 開催日の朝 08:00 JST
+    - cron: '0 1 * * 6,0'        # 開催日の朝 10:00 JST
     - cron: '30 4 * * 6,0,1'     # 開催日の昼 13:30 JST（締切前）
   workflow_dispatch:
 permissions:
